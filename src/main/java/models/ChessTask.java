@@ -1,19 +1,43 @@
 package models;
 
-public class    ChessTask {
+public class ChessTask {
+    private int id;
     private String fen;
     private String solution;
     private int difficulty;
 
-    public ChessTask(String fen, String solution, int difficulty) {
+    public ChessTask(int id, String fen, String solution, int difficulty) {
+        this.id = id;
         this.fen = fen;
         this.solution = solution;
         this.difficulty = difficulty;
     }
 
     // Геттеры и сеттеры
-    public String getFen() { return fen; }
-    public String getSolution() { return solution; }
-    public int getDifficulty() { return difficulty; }
+    public int getId() {
+        return id;
+    }
+
+    public String getFen() {
+        return fen;
+    }
+
+    public String getSolution() {
+        return solution;
+    }
+
+    public int getDifficulty() {
+        return difficulty;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessTask{" +
+                "id=" + id +
+                ", fen='" + fen + '\'' +
+                ", solution='" + solution + '\'' +
+                ", difficulty=" + difficulty +
+                '}';
+    }
 }
 

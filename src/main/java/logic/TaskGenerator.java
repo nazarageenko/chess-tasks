@@ -1,13 +1,13 @@
 package logic;
 
 import models.ChessTask;
+import database.TaskRepository;
 
 public class TaskGenerator {
-    public static ChessTask generateTask() {
-        String fen = "8/8/8/8/8/8/8/8 w - - 0 1"; // Пример FEN
-        String solution = "e4"; // Пример решения
-        int difficulty = 1;
-        return new ChessTask(fen, solution, difficulty);
+
+    // Метод для получения случайной задачи
+    public static ChessTask getRandomTask() {
+        // Получаем случайную задачу из базы данных
+        return TaskRepository.getRandomTask();
     }
 }
-

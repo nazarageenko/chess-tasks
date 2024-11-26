@@ -59,5 +59,23 @@ public class UserManager {
         }
         return -1;  // Возвращаем -1, если пользователь не найден
     }
-}
 
+        // Метод для обновления рейтинга пользователя
+        public static void updateUserRating (String username,int newRating){
+            String query = "UPDATE users SET rating = ? WHERE username = ?";
+
+            try (Connection conn = DatabaseConnection.connect();
+                 PreparedStatement stmt = conn.prepareStatement(query)) {
+
+                // Устанавливаем параметры запроса
+                stmt.setInt(1, newRating);   // Новый рейтинг
+                stmt.setString(2, username); // Имя пользователя
+
+                // Выполняем обновление
+                stmt.executeUpdate();
+                System.out.println("Рейтинг пользователя " + username + " обновлён до " + newRating);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
