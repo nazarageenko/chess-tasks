@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ChessBoard extends JPanel {
     private static final int SIZE = 8;
-    private static final int TILE_SIZE = 60;
+    private static final int TILE_SIZE = 80; // Размер клеток 80x80
 
     private String[][] board;
     private Map<String, ImageIcon> pieces;
@@ -17,21 +17,22 @@ public class ChessBoard extends JPanel {
         initBoardFromFEN(fen);
         pieces = new HashMap<>();
         loadPieceImages();
+        setPreferredSize(new Dimension((SIZE + 2) * TILE_SIZE, (SIZE + 2) * TILE_SIZE)); // Устанавливаем размер панели с учетом координат
     }
 
     private void loadPieceImages() {
-        pieces.put("wP", new ImageIcon(getClass().getResource("/images/wP.png")));
-        pieces.put("bP", new ImageIcon(getClass().getResource("/images/bP.png")));
-        pieces.put("wK", new ImageIcon(getClass().getResource("/images/wK.png")));
-        pieces.put("bK", new ImageIcon(getClass().getResource("/images/bK.png")));
-        pieces.put("wR", new ImageIcon(getClass().getResource("/images/wR.png")));
-        pieces.put("bR", new ImageIcon(getClass().getResource("/images/bR.png")));
-        pieces.put("wN", new ImageIcon(getClass().getResource("/images/wN.png")));
-        pieces.put("bN", new ImageIcon(getClass().getResource("/images/bN.png")));
-        pieces.put("wB", new ImageIcon(getClass().getResource("/images/wB.png")));
-        pieces.put("bB", new ImageIcon(getClass().getResource("/images/bB.png")));
-        pieces.put("wQ", new ImageIcon(getClass().getResource("/images/wQ.png")));
-        pieces.put("bQ", new ImageIcon(getClass().getResource("/images/bQ.png")));
+        pieces.put("P", new ImageIcon(getClass().getResource("/images/wP.png")));
+        pieces.put("p", new ImageIcon(getClass().getResource("/images/bP.png")));
+        pieces.put("K", new ImageIcon(getClass().getResource("/images/wK.png")));
+        pieces.put("k", new ImageIcon(getClass().getResource("/images/bK.png")));
+        pieces.put("R", new ImageIcon(getClass().getResource("/images/wR.png")));
+        pieces.put("r", new ImageIcon(getClass().getResource("/images/bR.png")));
+        pieces.put("N", new ImageIcon(getClass().getResource("/images/wN.png")));
+        pieces.put("n", new ImageIcon(getClass().getResource("/images/bN.png")));
+        pieces.put("B", new ImageIcon(getClass().getResource("/images/wB.png")));
+        pieces.put("b", new ImageIcon(getClass().getResource("/images/bB.png")));
+        pieces.put("Q", new ImageIcon(getClass().getResource("/images/wQ.png")));
+        pieces.put("q", new ImageIcon(getClass().getResource("/images/bQ.png")));
     }
 
     private void initBoardFromFEN(String fen) {
@@ -81,6 +82,8 @@ public class ChessBoard extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        // Рисуем клетки шахматной доски
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 if ((i + j) % 2 == 0) {
@@ -88,16 +91,32 @@ public class ChessBoard extends JPanel {
                 } else {
                     g.setColor(Color.DARK_GRAY);
                 }
-                g.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                g.fillRect((j + 1) * TILE_SIZE, (i + 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
                 String piece = board[i][j];
                 if (piece != null && !piece.isEmpty()) {
                     ImageIcon icon = pieces.get(piece);
                     if (icon != null) {
-                        icon.paintIcon(this, g, i * TILE_SIZE, j * TILE_SIZE);
+                        icon.paintIcon(this, g, (j + 1) * TILE_SIZE, (i + 1) * TILE_SIZE);
                     }
                 }
             }
+        }
+
+        // Рисуем буквы снизу и сверху
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 18));
+        for (int j = 0; j < SIZE; j++) {
+            String letter = String.valueOf((char) ('a' + j));
+            g.drawString(letter, (j + 1) * TILE_SIZE + TILE_SIZE / 2 - 5, TILE_SIZE / 2 + 5); // Верх
+            g.drawString(letter, (j + 1) * TILE_SIZE + TILE_SIZE / 2 - 5, (SIZE + 1) * TILE_SIZE + TILE_SIZE / 2 + 5); // Низ
+        }
+
+        // Рисуем цифры слева и справа
+        for (int i = 0; i < SIZE; i++) {
+            String number = String.valueOf(SIZE - i);
+            g.drawString(number, TILE_SIZE / 2 - 5, (i + 1) * TILE_SIZE + TILE_SIZE / 2 + 5); // Лево
+            g.drawString(number, (SIZE + 1) * TILE_SIZE + TILE_SIZE / 2 - 5, (i + 1) * TILE_SIZE + TILE_SIZE / 2 + 5); // Право
         }
     }
 

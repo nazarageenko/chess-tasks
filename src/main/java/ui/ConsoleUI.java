@@ -12,6 +12,7 @@ public class ConsoleUI {
 
     private String username = null;
     private int userRating = 1200; // Начальный рейтинг
+    private ChessTask currentTask; // Текущая задача
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ConsoleUI().createAndShowGUI());
@@ -21,7 +22,7 @@ public class ConsoleUI {
         // Создание фрейма
         JFrame frame = new JFrame("Шахматное приложение");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 800);
+        frame.setSize(800, 900); // Увеличенный размер фрейма
 
         // Основная панель с BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -35,7 +36,7 @@ public class ConsoleUI {
         JLabel title = new JLabel("Добро пожаловать в шахматное приложение!");
         topPanel.add(title);
 
-        // Для отображения задач, решения и рейтинга
+        // Для отображения задач и рейтинга
         JLabel fenLabel = new JLabel("FEN: Ожидайте задачи...");
         JLabel solutionLabel = new JLabel("Решение:...");
         JLabel ratingLabel = new JLabel("Ваш рейтинг: " + userRating);
@@ -68,8 +69,9 @@ public class ConsoleUI {
         topPanel.add(getNewTaskButton);
 
         // Панель для шахматной доски
-        String initialFen = "8/8/8/8/8/8/4R3/k6K";
+        String initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
         ChessBoard chessBoard = new ChessBoard(initialFen);
+        chessBoard.setVisible(true);
 
         // Панель для ввода ответа
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -83,7 +85,7 @@ public class ConsoleUI {
 
         // Добавляем панели в основную панель
         mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(chessBoard, BorderLayout.CENTER);
+        mainPanel.add(new JScrollPane(chessBoard), BorderLayout.CENTER); // Оборачиваем шахматную доску в JScrollPane
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         // Добавляем основную панель в фрейм
@@ -133,12 +135,14 @@ public class ConsoleUI {
             public void actionPerformed(ActionEvent e) {
                 ChessTask task = TaskGenerator.getRandomTask();
                 if (task != null) {
+                    currentTask = task; // Сохраняем текущую задачу
                     String fen = task.getFen();
                     System.out.println("FEN строка в ConsoleUI до переустановки: " + fen);
 
+                    // Проверим, корректна ли FEN строка
                     if (fen == null || fen.trim().isEmpty()) {
                         System.out.println("Получена пустая или некорректная FEN строка, используем стандартную.");
-                        fen = "8/8/8/8/8/8/4R3/k6K";
+                        fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"; // Стандартная FEN строка
                     }
 
                     fenLabel.setText("FEN: " + fen);
@@ -159,7 +163,8 @@ public class ConsoleUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String userInput = answerField.getText().trim();
-                String correctSolution = solutionLabel.getText().replace("Решение: ", "").trim();
+                // Используем сохраненное решение текущей задачи
+                String correctSolution = currentTask != null ? currentTask.getSolution() : "";
                 if (userInput.equalsIgnoreCase(correctSolution)) {
                     userRating += 10;
                     statusLabel.setText("Правильный ответ! Ваш новый рейтинг: " + userRating);
