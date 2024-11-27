@@ -27,6 +27,12 @@
             <artifactId>spring-security-core</artifactId>
             <version>6.4.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx</artifactId>
+            <version>23</version>
+        </dependency>
     </dependencies>
 
 </project>
