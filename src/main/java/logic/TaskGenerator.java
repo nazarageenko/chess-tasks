@@ -5,9 +5,13 @@ import database.TaskRepository;
 
 public class TaskGenerator {
 
-    // Метод для получения случайной задачи
     public static ChessTask getRandomTask() {
-        // Получаем случайную задачу из базы данных
-        return TaskRepository.getRandomTask();
+        ChessTask task = TaskRepository.getRandomTask();
+        if (task == null) {
+            System.err.println("Ошибка: не удалось получить задачу из TaskRepository.");
+        } else {
+            System.out.println("Успешно получена задача с FEN: " + task.getFen());
+        }
+        return task;
     }
 }

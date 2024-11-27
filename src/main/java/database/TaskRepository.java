@@ -15,14 +15,22 @@ public class TaskRepository {
              ResultSet rs = stmt.executeQuery()) {
 
             if (rs.next()) {
-                // Получаем данные из базы
                 int id = rs.getInt("task_id");
                 String fen = rs.getString("fen");
                 String solution = rs.getString("solution");
                 int difficulty = rs.getInt("difficulty");
 
-                // Передаем все 4 параметра в конструктор
+                // Логирование полученной FEN строки
+                System.out.println("Полученная FEN строка из базы данных: " + fen);
+
+                if (fen == null || fen.trim().isEmpty()) {
+                    System.err.println("Ошибка: получена пустая FEN строка из базы данных.");
+                    return null;
+                }
+
                 return new ChessTask(id, fen, solution, difficulty);
+            } else {
+                System.err.println("Ошибка: не удалось найти задачу в базе данных.");
             }
         } catch (Exception e) {
             e.printStackTrace();

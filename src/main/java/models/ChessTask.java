@@ -11,6 +11,9 @@ public class ChessTask {
         this.fen = fen;
         this.solution = solution;
         this.difficulty = difficulty;
+
+        // Логирование переданной FEN строки
+        System.out.println("Создана задача с FEN строкой: " + this.fen);
     }
 
     // Геттеры и сеттеры

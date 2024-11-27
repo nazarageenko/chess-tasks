@@ -21,57 +21,74 @@ public class ConsoleUI {
         // Создание фрейма
         JFrame frame = new JFrame("Шахматное приложение");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 350);
+        frame.setSize(600, 800);
 
-        // Панель для элементов интерфейса
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Основная панель с BorderLayout
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Панель для верхних элементов интерфейса
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
         // Заголовок
         JLabel title = new JLabel("Добро пожаловать в шахматное приложение!");
-        panel.add(title);
+        topPanel.add(title);
 
         // Для отображения задач, решения и рейтинга
         JLabel fenLabel = new JLabel("FEN: Ожидайте задачи...");
         JLabel solutionLabel = new JLabel("Решение:...");
         JLabel ratingLabel = new JLabel("Ваш рейтинг: " + userRating);
-        panel.add(fenLabel);
-        panel.add(solutionLabel);
-        panel.add(ratingLabel);
+        topPanel.add(fenLabel);
+        topPanel.add(solutionLabel);
+        topPanel.add(ratingLabel);
 
-        // Поля для ввода логина и пароля с уменьшенным размером
-        JTextField loginField = new JTextField(15);  // Уменьшаем поле для логина до 15 символов
+        // Поля для ввода логина и пароля
+        JTextField loginField = new JTextField(15);
         loginField.setToolTipText("Введите ваш логин");
-        panel.add(loginField);
+        topPanel.add(loginField);
 
-        JPasswordField passwordField = new JPasswordField(15);  // Уменьшаем поле для пароля до 15 символов
+        JPasswordField passwordField = new JPasswordField(15);
         passwordField.setToolTipText("Введите ваш пароль");
-        panel.add(passwordField);
+        topPanel.add(passwordField);
 
         // Кнопки для входа и регистрации
         JButton registerButton = new JButton("Зарегистрироваться");
         JButton loginButton = new JButton("Войти");
-        panel.add(registerButton);
-        panel.add(loginButton);
+        topPanel.add(registerButton);
+        topPanel.add(loginButton);
 
         // Метки для уведомлений
         JLabel statusLabel = new JLabel("");
-        panel.add(statusLabel);
+        topPanel.add(statusLabel);
 
         // Кнопка для получения новой задачи
         JButton getNewTaskButton = new JButton("Получить новую задачу");
-        getNewTaskButton.setEnabled(false); // Ожидаем, пока пользователь не войдёт
-        panel.add(getNewTaskButton);
+        getNewTaskButton.setEnabled(false);
+        topPanel.add(getNewTaskButton);
 
-        // Поле для ввода ответа
+        // Панель для шахматной доски
+        String initialFen = "8/8/8/8/8/8/4R3/k6K";
+        ChessBoard chessBoard = new ChessBoard(initialFen);
+
+        // Панель для ввода ответа
+        JPanel bottomPanel = new JPanel(new BorderLayout());
         JTextField answerField = new JTextField(20);
         answerField.setToolTipText("Введите ваш ход");
-        panel.add(answerField);
+        bottomPanel.add(answerField, BorderLayout.CENTER);
 
         JButton submitAnswerButton = new JButton("Отправить ответ");
-        submitAnswerButton.setEnabled(false); // Ожидаем, пока задача не будет загружена
-        panel.add(submitAnswerButton);
+        submitAnswerButton.setEnabled(false);
+        bottomPanel.add(submitAnswerButton, BorderLayout.EAST);
+
+        // Добавляем панели в основную панель
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(chessBoard, BorderLayout.CENTER);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        // Добавляем основную панель в фрейм
+        frame.getContentPane().add(mainPanel);
+        frame.setVisible(true);
 
         // Обработчик для кнопки регистрации
         registerButton.addActionListener(new ActionListener() {
@@ -81,8 +98,7 @@ public class ConsoleUI {
                 String password = new String(passwordField.getPassword()).trim();
                 if (UserManager.registerUser(login, password)) {
                     statusLabel.setText("Регистрация прошла успешно! Теперь вы можете войти.");
-                    // Скрываем только кнопку регистрации, оставляем кнопку входа
-                    registerButton.setVisible(false); // Скрываем кнопку регистрации
+                    registerButton.setVisible(false);
                 } else {
                     statusLabel.setText("Ошибка при регистрации. Логин уже существует.");
                 }
@@ -97,15 +113,14 @@ public class ConsoleUI {
                 String password = new String(passwordField.getPassword()).trim();
                 if (UserManager.authenticateUser(login, password)) {
                     username = login;
-                    userRating = UserManager.getUserRating(username); // Получаем рейтинг из базы данных
+                    userRating = UserManager.getUserRating(username);
                     statusLabel.setText("Вход выполнен успешно! Добро пожаловать, " + username);
-                    ratingLabel.setText("Ваш рейтинг: " + userRating); // Отображаем рейтинг
-                    getNewTaskButton.setEnabled(true); // Включаем кнопку для получения задач
-                    loginButton.setEnabled(false); // Выключаем кнопку входа
-                    // Скрываем поля для логина и пароля после успешного входа
+                    ratingLabel.setText("Ваш рейтинг: " + userRating);
+                    getNewTaskButton.setEnabled(true);
+                    loginButton.setEnabled(false);
                     loginField.setVisible(false);
                     passwordField.setVisible(false);
-                    registerButton.setVisible(false); // Скрываем кнопку регистрации
+                    registerButton.setVisible(false);
                 } else {
                     statusLabel.setText("Неверный логин или пароль. Попробуйте ещё раз.");
                 }
@@ -118,9 +133,21 @@ public class ConsoleUI {
             public void actionPerformed(ActionEvent e) {
                 ChessTask task = TaskGenerator.getRandomTask();
                 if (task != null) {
-                    fenLabel.setText("FEN: " + task.getFen());
+                    String fen = task.getFen();
+                    System.out.println("FEN строка в ConsoleUI до переустановки: " + fen);
+
+                    if (fen == null || fen.trim().isEmpty()) {
+                        System.out.println("Получена пустая или некорректная FEN строка, используем стандартную.");
+                        fen = "8/8/8/8/8/8/4R3/k6K";
+                    }
+
+                    fenLabel.setText("FEN: " + fen);
                     solutionLabel.setText("Решение: " + task.getSolution());
-                    submitAnswerButton.setEnabled(true); // Включаем кнопку отправки ответа
+                    submitAnswerButton.setEnabled(true);
+
+                    System.out.println("Перед вызовом setFEN, FEN строка: " + fen);
+                    chessBoard.setFEN(fen);
+                    chessBoard.setVisible(true);
                 } else {
                     fenLabel.setText("Задачи не найдены.");
                 }
@@ -141,14 +168,10 @@ public class ConsoleUI {
                     statusLabel.setText("Неверный ответ. Правильный ответ: " + correctSolution + ". Ваш рейтинг: " + userRating);
                 }
                 ratingLabel.setText("Ваш рейтинг: " + userRating);
-                UserManager.updateUserRating(username, userRating); // Обновляем рейтинг в базе
-                answerField.setText(""); // Очищаем поле для ответа
-                submitAnswerButton.setEnabled(false); // Отключаем кнопку
+                UserManager.updateUserRating(username, userRating);
+                answerField.setText("");
+                submitAnswerButton.setEnabled(false);
             }
         });
-
-        // Добавляем панель на фрейм
-        frame.getContentPane().add(panel);
-        frame.setVisible(true);
     }
 }
