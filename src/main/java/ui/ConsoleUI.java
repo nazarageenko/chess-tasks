@@ -135,6 +135,11 @@ public class ConsoleUI {
                     statusLabel.setText("Вход выполнен успешно! Добро пожаловать, " + username);
                     ratingLabel.setText("Ваш рейтинг: " + userRating);
                     getNewTaskButton.setEnabled(true);
+                    loginButton.setVisible(false);
+                    loginField.setVisible(false);
+                    passwordField.setVisible(false);
+                    registerButton.setVisible(false);
+                    updateLeaderboard(leaderboardPanel); // Обновление лидерборда при входе
                 } else {
                     statusLabel.setText("Неверный логин или пароль. Попробуйте ещё раз.");
                 }
@@ -183,7 +188,7 @@ public class ConsoleUI {
                     statusLabel.setText("Правильный ответ! Ваш новый рейтинг: " + userRating);
                 } else {
                     userRating -= 10;
-                    statusLabel.setText("Неверный ответ. Правильный ответ: " + correctSolution + ". Ваш рейтинг: " + userRating);
+                    statusLabel.setText("Неверный ответ. Ваш рейтинг: " + userRating);
                 }
                 ratingLabel.setText("Ваш рейтинг: " + userRating);
                 UserManager.updateUserRating(username, userRating);
