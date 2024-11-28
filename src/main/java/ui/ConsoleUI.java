@@ -4,8 +4,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import users.UserManager;
 import models.ChessTask;
+import models.User;
 import logic.TaskGenerator;
 
 public class ConsoleUI {
@@ -22,7 +24,7 @@ public class ConsoleUI {
         // Создание фрейма
         JFrame frame = new JFrame("chess-tasks");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 900); // Увеличенный размер фрейма
+        frame.setSize(1200, 900); // Увеличенный размер фрейма
 
         // Основная панель с BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -90,10 +92,17 @@ public class ConsoleUI {
         submitAnswerButton.setEnabled(false);
         bottomPanel.add(submitAnswerButton, BorderLayout.EAST);
 
+        // Панель для отображения лидерборда
+        JPanel leaderboardPanel = new JPanel();
+        leaderboardPanel.setLayout(new BoxLayout(leaderboardPanel, BoxLayout.Y_AXIS));
+        leaderboardPanel.setBorder(BorderFactory.createTitledBorder("Leaderboard"));
+        updateLeaderboard(leaderboardPanel);
+
         // Добавляем панели в основную панель
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(new JScrollPane(chessBoard), BorderLayout.CENTER); // Оборачиваем шахматную доску в JScrollPane
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        mainPanel.add(new JScrollPane(leaderboardPanel), BorderLayout.EAST); // Добавляем панель лидерборда
 
         // Добавляем основную панель в фрейм
         frame.getContentPane().add(mainPanel);
@@ -126,10 +135,6 @@ public class ConsoleUI {
                     statusLabel.setText("Вход выполнен успешно! Добро пожаловать, " + username);
                     ratingLabel.setText("Ваш рейтинг: " + userRating);
                     getNewTaskButton.setEnabled(true);
-                    loginButton.setEnabled(false);
-                    loginField.setVisible(false);
-                    passwordField.setVisible(false);
-                    registerButton.setVisible(false);
                 } else {
                     statusLabel.setText("Неверный логин или пароль. Попробуйте ещё раз.");
                 }
@@ -184,7 +189,25 @@ public class ConsoleUI {
                 UserManager.updateUserRating(username, userRating);
                 answerField.setText("");
                 submitAnswerButton.setEnabled(false);
+                updateLeaderboard(leaderboardPanel); // Обновление лидерборда после ответа
             }
         });
+    }
+
+    // Метод для обновления лидерборда
+    private void updateLeaderboard(JPanel leaderboardPanel) {
+        leaderboardPanel.removeAll();
+        List<User> topUsers = UserManager.getTopUsers();
+        int rank = 1;
+        for (User user : topUsers) {
+            leaderboardPanel.add(new JLabel(rank + ". " + user.getUsername() + " - " + user.getRating()));
+            rank++;
+        }
+        User currentUser = UserManager.getUserPosition(username);
+        if (currentUser != null && rank > 10) {
+            leaderboardPanel.add(new JLabel((currentUser.getId() + 1) + ". " + currentUser.getUsername() + " - " + currentUser.getRating()));
+        }
+        leaderboardPanel.revalidate();
+        leaderboardPanel.repaint();
     }
 }

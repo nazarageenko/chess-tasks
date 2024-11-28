@@ -1,11 +1,11 @@
 package users;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import database.DatabaseConnection;
 import utils.PasswordUtils;
+import models.User;
 
 public class UserManager {
 
@@ -60,22 +60,68 @@ public class UserManager {
         return -1;  // Возвращаем -1, если пользователь не найден
     }
 
-        // Метод для обновления рейтинга пользователя
-        public static void updateUserRating (String username,int newRating){
-            String query = "UPDATE users SET rating = ? WHERE username = ?";
+    // Обновление рейтинга пользователя
+    public static void updateUserRating(String username, int newRating) {
+        String query = "UPDATE users SET rating = ? WHERE username = ?";
 
-            try (Connection conn = DatabaseConnection.connect();
-                 PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                // Устанавливаем параметры запроса
-                stmt.setInt(1, newRating);   // Новый рейтинг
-                stmt.setString(2, username); // Имя пользователя
+            // Устанавливаем параметры запроса
+            stmt.setInt(1, newRating);   // Новый рейтинг
+            stmt.setString(2, username); // Имя пользователя
 
-                // Выполняем обновление
-                stmt.executeUpdate();
-                System.out.println("Рейтинг пользователя " + username + " обновлён до " + newRating);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            // Выполняем обновление
+            stmt.executeUpdate();
+            System.out.println("Рейтинг пользователя " + username + " обновлён до " + newRating);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
+    // Получение топ-10 пользователей по рейтингу
+    public static List<User> getTopUsers() {
+        List<User> users = new ArrayList<>();
+        String query = "SELECT * FROM users ORDER BY rating DESC LIMIT 10";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("user_id");
+                String username = rs.getString("username");
+                int rating = rs.getInt("rating");
+                users.add(new User(id, username, rating));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    // Получение позиции и рейтинга пользователя, если он не в топ-10
+    public static User getUserPosition(String username) {
+        String query = "SELECT COUNT(*) AS position FROM users WHERE rating > (SELECT rating FROM users WHERE username = ?)";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int position = rs.getInt("position") + 1; // Добавляем 1, чтобы учесть самого пользователя
+                int rating = getUserRating(username);
+                return new User(position, username, rating);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+}
