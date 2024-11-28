@@ -164,7 +164,7 @@ public class ConsoleUI {
                     }
 
                     fenLabel.setText("FEN: " + fen);
-                    solutionLabel.setText("Решение: " + task.getSolution());
+                    solutionLabel.setText("Решение:...");
                     submitAnswerButton.setEnabled(true);
 
                     System.out.println("Перед вызовом setFEN, FEN строка: " + fen);
