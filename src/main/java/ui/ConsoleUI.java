@@ -20,7 +20,7 @@ public class ConsoleUI {
 
     public void createAndShowGUI() {
         // Создание фрейма
-        JFrame frame = new JFrame("Шахматное приложение");
+        JFrame frame = new JFrame("chess-tasks");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 900); // Увеличенный размер фрейма
 
@@ -62,6 +62,13 @@ public class ConsoleUI {
         // Метки для уведомлений
         JLabel statusLabel = new JLabel("");
         topPanel.add(statusLabel);
+
+        // Выбор сложности задачи
+        JLabel difficultyLabel = new JLabel("Выберите сложность задачи:");
+        String[] difficulties = {"1", "2", "3"};
+        JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
+        topPanel.add(difficultyLabel);
+        topPanel.add(difficultyComboBox);
 
         // Кнопка для получения новой задачи
         JButton getNewTaskButton = new JButton("Получить новую задачу");
@@ -133,7 +140,8 @@ public class ConsoleUI {
         getNewTaskButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ChessTask task = TaskGenerator.getRandomTask();
+                int selectedDifficulty = Integer.parseInt((String) difficultyComboBox.getSelectedItem());
+                ChessTask task = TaskGenerator.getRandomTaskByDifficulty(selectedDifficulty);
                 if (task != null) {
                     currentTask = task; // Сохраняем текущую задачу
                     String fen = task.getFen();
