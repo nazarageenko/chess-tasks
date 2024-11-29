@@ -125,4 +125,31 @@ public class ChessBoard extends JPanel {
         initBoardFromFEN(fen);
         repaint();
     }
+
+    public String getFEN() {
+        // Генерация FEN строки на основе текущего состояния доски
+        StringBuilder fen = new StringBuilder();
+        for (int i = 0; i < SIZE; i++) {
+            int emptyCount = 0;
+            for (int j = 0; j < SIZE; j++) {
+                String piece = board[i][j];
+                if (piece == null || piece.isEmpty()) {
+                    emptyCount++;
+                } else {
+                    if (emptyCount > 0) {
+                        fen.append(emptyCount);
+                        emptyCount = 0;
+                    }
+                    fen.append(piece);
+                }
+            }
+            if (emptyCount > 0) {
+                fen.append(emptyCount);
+            }
+            if (i < SIZE - 1) {
+                fen.append('/');
+            }
+        }
+        return fen.toString();
+    }
 }

@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import users.UserManager;
@@ -18,7 +17,8 @@ public class ConsoleUI {
     private String username = null;
     private int userRating = 1200; // Начальный рейтинг
     private ChessTask currentTask; // Текущая задача
-    private JLabel currentPlayerLabel; // Метка для отображения текущего игрока
+    private int currentMoveIndex = 0; // Индекс текущего хода пользователя
+    private boolean isUserTurn = true; // Указание на ход пользователя
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ConsoleUI().createAndShowGUI());
@@ -45,7 +45,7 @@ public class ConsoleUI {
         // Для отображения задач и рейтинга
         JLabel fenLabel = new JLabel("FEN: Ожидайте задачи...");
         JLabel solutionLabel = new JLabel("Решение:...");
-        currentPlayerLabel = new JLabel("Текущий игрок: ...");
+        JLabel currentPlayerLabel = new JLabel("Текущий игрок: ...");
         JLabel ratingLabel = new JLabel("Ваш рейтинг: " + userRating);
         topPanel.add(fenLabel);
         topPanel.add(solutionLabel);
@@ -160,6 +160,8 @@ public class ConsoleUI {
                 ChessTask task = TaskGenerator.getRandomTaskByDifficulty(selectedDifficulty);
                 if (task != null) {
                     currentTask = task; // Сохраняем текущую задачу
+                    currentMoveIndex = 0; // Сбрасываем индекс хода
+                    isUserTurn = true; // Устанавливаем ход пользователя
                     String fen = task.getFen();
                     System.out.println("FEN строка в ConsoleUI до переустановки: " + fen);
 
@@ -171,7 +173,6 @@ public class ConsoleUI {
 
                     fenLabel.setText("FEN: " + fen);
                     solutionLabel.setText("Решение:...");
-                    currentPlayerLabel.setText("Текущий игрок: " + (task.getCurrentPlayer() == 'w' ? "Белые" : "Черные"));
                     submitAnswerButton.setEnabled(true);
 
                     System.out.println("Перед вызовом setFEN, FEN строка: " + fen);
@@ -187,33 +188,55 @@ public class ConsoleUI {
         submitAnswerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String userInput = answerField.getText().trim();
+                if (isUserTurn) {
+                    String userInput = answerField.getText().trim();
+                    JSONArray solution = currentTask != null ? currentTask.getSolution() : new JSONArray();
+                    if (currentMoveIndex < solution.length()) {
+                        JSONObject correctMove = solution.getJSONObject(currentMoveIndex);
+                        if (userInput.equalsIgnoreCase(correctMove.getString("move"))) {
+                            currentMoveIndex++;
+                            isUserTurn = false;
+                            statusLabel.setText("Правильный ход! Теперь ход противника.");
+                            chessBoard.setFEN(applyMove(chessBoard.getFEN(), userInput)); // Обновляем доску
+                            chessBoard.repaint();
 
-                // Парсинг JSON решения и проверка на соответствие
-                JSONArray solution = currentTask != null ? currentTask.getSolution() : new JSONArray();
-                boolean isCorrect = false;
-                for (int i = 0; i < solution.length(); i++) {
-                    JSONObject move = solution.getJSONObject(i);
-                    if (userInput.equalsIgnoreCase(move.getString("move"))) {
-                        isCorrect = true;
-                        break;
+                            // Автоматически выполняем ход противника
+                            if (currentMoveIndex < solution.length()) {
+                                correctMove = solution.getJSONObject(currentMoveIndex);
+                                chessBoard.setFEN(applyMove(chessBoard.getFEN(), correctMove.getString("move")));
+                                chessBoard.repaint();
+                                currentMoveIndex++;
+                                isUserTurn = true;
+                                statusLabel.setText("Ход противника выполнен. Ваш ход.");
+                            }
+
+                            if (currentMoveIndex == solution.length()) {
+                                userRating += 10;
+                                statusLabel.setText("Правильный ответ! Ваш новый рейтинг: " + userRating);
+                                submitAnswerButton.setEnabled(false);
+                            }
+                        } else {
+                            userRating -= 10;
+                            statusLabel.setText("Неверный ответ. Ваш рейтинг: " + userRating);
+                            currentMoveIndex = 0; // Возврат к началу задачи
+                        }
                     }
                 }
 
-                if (isCorrect) {
-                    userRating += 10;
-                    statusLabel.setText("Правильный ответ! Ваш новый рейтинг: " + userRating);
-                } else {
-                    userRating -= 10;
-                    statusLabel.setText("Неверный ответ. Ваш рейтинг: " + userRating);
-                }
                 ratingLabel.setText("Ваш рейтинг: " + userRating);
                 UserManager.updateUserRating(username, userRating);
                 answerField.setText("");
-                submitAnswerButton.setEnabled(false);
                 updateLeaderboard(leaderboardPanel); // Обновление лидерборда после ответа
             }
         });
+    }
+
+    private String applyMove(String fen, String move) {
+        // Метод для применения хода к текущей позиции FEN (примерная реализация)
+        // Здесь вы можете использовать существующую библиотеку для работы с шахматами, чтобы применять ходы и обновлять FEN
+        // Это необходимо, чтобы изменить позицию доски в соответствии с ходами
+
+        return fen; // Верните обновленный FEN после применения хода
     }
 
     // Метод для обновления лидерборда
@@ -233,3 +256,4 @@ public class ConsoleUI {
         leaderboardPanel.repaint();
     }
 }
+
