@@ -6,7 +6,7 @@
 
     <groupId>org.example</groupId>
     <artifactId>chess-tasks</artifactId>
-    <version>0.9.3</version>
+    <version>0.9.5</version>
 
     <dependencies>
         <dependency>
@@ -29,10 +29,11 @@
         </dependency>
 
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx</artifactId>
-            <version>23</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
         </dependency>
+
     </dependencies>
 
 </project>

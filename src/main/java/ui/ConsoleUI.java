@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import users.UserManager;
 import models.ChessTask;
 import models.User;
@@ -67,7 +70,7 @@ public class ConsoleUI {
 
         // Выбор сложности задачи
         JLabel difficultyLabel = new JLabel("Выберите сложность задачи:");
-        String[] difficulties = {"1", "2", "3"};
+        String[] difficulties = {"2", "3", "4"};
         JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
         topPanel.add(difficultyLabel);
         topPanel.add(difficultyComboBox);
@@ -181,9 +184,19 @@ public class ConsoleUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String userInput = answerField.getText().trim();
-                // Используем сохраненное решение текущей задачи
-                String correctSolution = currentTask != null ? currentTask.getSolution() : "";
-                if (userInput.equalsIgnoreCase(correctSolution)) {
+
+                // Парсинг JSON решения и проверка на соответствие
+                JSONArray solution = currentTask != null ? currentTask.getSolution() : new JSONArray();
+                boolean isCorrect = false;
+                for (int i = 0; i < solution.length(); i++) {
+                    JSONObject move = solution.getJSONObject(i);
+                    if (userInput.equalsIgnoreCase(move.getString("move"))) {
+                        isCorrect = true;
+                        break;
+                    }
+                }
+
+                if (isCorrect) {
                     userRating += 10;
                     statusLabel.setText("Правильный ответ! Ваш новый рейтинг: " + userRating);
                 } else {
