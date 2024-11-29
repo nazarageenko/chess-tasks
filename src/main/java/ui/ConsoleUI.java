@@ -18,6 +18,7 @@ public class ConsoleUI {
     private String username = null;
     private int userRating = 1200; // Начальный рейтинг
     private ChessTask currentTask; // Текущая задача
+    private JLabel currentPlayerLabel; // Метка для отображения текущего игрока
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ConsoleUI().createAndShowGUI());
@@ -44,9 +45,11 @@ public class ConsoleUI {
         // Для отображения задач и рейтинга
         JLabel fenLabel = new JLabel("FEN: Ожидайте задачи...");
         JLabel solutionLabel = new JLabel("Решение:...");
+        currentPlayerLabel = new JLabel("Текущий игрок: ...");
         JLabel ratingLabel = new JLabel("Ваш рейтинг: " + userRating);
         topPanel.add(fenLabel);
         topPanel.add(solutionLabel);
+        topPanel.add(currentPlayerLabel);
         topPanel.add(ratingLabel);
 
         // Поля для ввода логина и пароля
@@ -70,7 +73,7 @@ public class ConsoleUI {
 
         // Выбор сложности задачи
         JLabel difficultyLabel = new JLabel("Выберите сложность задачи:");
-        String[] difficulties = {"2", "3", "4"};
+        String[] difficulties = {"1", "2", "3", "4"};
         JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
         topPanel.add(difficultyLabel);
         topPanel.add(difficultyComboBox);
@@ -168,6 +171,7 @@ public class ConsoleUI {
 
                     fenLabel.setText("FEN: " + fen);
                     solutionLabel.setText("Решение:...");
+                    currentPlayerLabel.setText("Текущий игрок: " + (task.getCurrentPlayer() == 'w' ? "Белые" : "Черные"));
                     submitAnswerButton.setEnabled(true);
 
                     System.out.println("Перед вызовом setFEN, FEN строка: " + fen);
